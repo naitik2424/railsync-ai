@@ -1,0 +1,28 @@
+{
+  "accuracy": 0.6875,
+  "precision": 0.7514,
+  "recall": 0.6952,
+  "f1_score": 0.7222,
+  "roc_auc": 0.746,
+  "baseline_accuracy": 0.5844,
+  "training_samples": 1280,
+  "test_samples": 320,
+  "trained_at": "2026-10-25T10:03:19.929482+00:00",
+  "model_type": "RandomForestClassifier(Pipeline)",
+  "feature_importances": {
+    "planned_duration_hours": 0.1306,
+    "complexity_score": 0.1152,
+    "equipment_age_years": 0.0943,
+    "crew_shortage_ratio": 0.0898,
+    "weather_condition_Clear": 0.0861,
+    "dependency_count": 0.0659,
+    "crew_size_allocated": 0.0513,
+    "historical_section_delay_rate": 0.0394,
+    "is_night_shift": 0.0383,
+    "crew_experience_level": 0.0367,
+    "weather_condition_Rain": 0.0242,
+    "weather_condition_Fog": 0.0234
+  },
+  "is_simulated_synthetic": true,
+  "notes": "Trained on deterministic synthetic railway maintenance operations data. Prevents target leakage."
+}

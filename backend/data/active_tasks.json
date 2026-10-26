@@ -1,0 +1,251 @@
+[
+  {
+    "id": "TSK-TRK-101",
+    "title": "Mainline Rail Ultrasonic Testing & Joint Tightening",
+    "description": "Continuous flaw detection testing on Section A-1 North track segment, followed by fishplate joint torque verification.",
+    "department": "Track",
+    "section": "Section A-1 (Mainline North)",
+    "maintenance_type": "Rail Grinding & Ultrasonic Testing",
+    "planned_duration_hours": 3.0,
+    "priority": "High",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "Track Gang Alpha",
+      "crew_size": 5,
+      "equipment": [
+        "Ultrasonic Flaw Detector UFD-4"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": 40
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [],
+    "compatible_with_simultaneous_types": [
+      "OHE Power Block Inspection",
+      "Level Crossing S&T Servicing"
+    ],
+    "planned_start_offset_hours": 0.0
+  },
+  {
+    "id": "TSK-OHE-201",
+    "title": "25kV Catenary Insulator Cleaning & Mast Grounding",
+    "description": "Routine high-voltage insulator washing and grounding inspection on Section A-1 overhead equipment.",
+    "department": "Electrical / OHE",
+    "section": "Section A-1 (Mainline North)",
+    "maintenance_type": "OHE Power Block Inspection",
+    "planned_duration_hours": 3.0,
+    "priority": "Medium",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "OHE Line Crew 1",
+      "crew_size": 4,
+      "equipment": [
+        "Tower Wagon TW-202",
+        "High-Voltage Grounding Kits"
+      ],
+      "power_block_required": true,
+      "speed_restriction_kmh": null
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [],
+    "compatible_with_simultaneous_types": [
+      "Rail Grinding & Ultrasonic Testing",
+      "Level Crossing S&T Servicing"
+    ],
+    "planned_start_offset_hours": 0.0
+  },
+  {
+    "id": "TSK-SNT-301",
+    "title": "Point Machine 44B Overhaul & Lubrication",
+    "description": "Mechanical inspection, stroke calibration, and contact cleansing on facing crossover point machine.",
+    "department": "Signalling & Telecommunications (S&T)",
+    "section": "Section A-2 (Junction Yard)",
+    "maintenance_type": "Point Machine Maintenance",
+    "planned_duration_hours": 2.5,
+    "priority": "Critical",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "Signal Engineers Group A",
+      "crew_size": 3,
+      "equipment": [
+        "Point Machine Drive Calibrator"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": 15
+    },
+    "crew_availability_ratio": 0.9,
+    "equipment_available": true,
+    "dependencies": [],
+    "compatible_with_simultaneous_types": [
+      "Traffic Block Coordination"
+    ],
+    "planned_start_offset_hours": 1.0
+  },
+  {
+    "id": "TSK-TRK-102",
+    "title": "Ballast Tamping & Track Geometry Realignment",
+    "description": "Mechanical tamping of 1.8km track bed in Section A-2 Junction yard to restore track alignment and cross-level.",
+    "department": "Track",
+    "section": "Section A-2 (Junction Yard)",
+    "maintenance_type": "Ballast Tamping",
+    "planned_duration_hours": 4.0,
+    "priority": "High",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "Track Gang Beta",
+      "crew_size": 6,
+      "equipment": [
+        "Tamping Machine 01",
+        "Ballast Regulator BR-3"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": 30
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [
+      "TSK-SNT-301"
+    ],
+    "compatible_with_simultaneous_types": [],
+    "planned_start_offset_hours": 3.5
+  },
+  {
+    "id": "TSK-OPS-401",
+    "title": "Traffic Block Management & Suburban Freight Diversion",
+    "description": "Establish temporary single-line working and route diversion protocol for Section B-1 corridor during heavy renewal work.",
+    "department": "Railway Operations",
+    "section": "Section B-1 (Suburban Corridor)",
+    "maintenance_type": "Traffic Block Coordination",
+    "planned_duration_hours": 5.0,
+    "priority": "High",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "Traffic Controllers Unit",
+      "crew_size": 3,
+      "equipment": [
+        "Signalling Control Console Sim"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": null
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [],
+    "compatible_with_simultaneous_types": [
+      "Track Relaying / Renewal",
+      "Signal Interlocking Overhaul"
+    ],
+    "planned_start_offset_hours": 0.0
+  },
+  {
+    "id": "TSK-TRK-103",
+    "title": "Suburban Track Relaying & Sleeper Renewal",
+    "description": "Complete rail replacement and concrete sleeper renewal on Section B-1 fast line.",
+    "department": "Track",
+    "section": "Section B-1 (Suburban Corridor)",
+    "maintenance_type": "Track Relaying / Renewal",
+    "planned_duration_hours": 5.5,
+    "priority": "Critical",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "Track Gang Alpha",
+      "crew_size": 8,
+      "equipment": [
+        "Tamping Machine 01",
+        "Ballast Regulator BR-3"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": 20
+    },
+    "crew_availability_ratio": 0.85,
+    "equipment_available": true,
+    "dependencies": [
+      "TSK-OPS-401"
+    ],
+    "compatible_with_simultaneous_types": [
+      "Traffic Block Coordination"
+    ],
+    "planned_start_offset_hours": 1.0
+  },
+  {
+    "id": "TSK-SNT-302",
+    "title": "Electronic Interlocking Logic Testing & Axle Counter Reset",
+    "description": "Software interlocking verification and multi-section digital axle counter calibration post-relaying.",
+    "department": "Signalling & Telecommunications (S&T)",
+    "section": "Section B-1 (Suburban Corridor)",
+    "maintenance_type": "Signal Interlocking Overhaul",
+    "planned_duration_hours": 3.0,
+    "priority": "High",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "Signal Engineers Group A",
+      "crew_size": 4,
+      "equipment": [
+        "Interlocking Test Kit ITK-3"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": null
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [
+      "TSK-TRK-103"
+    ],
+    "compatible_with_simultaneous_types": [],
+    "planned_start_offset_hours": 6.5
+  },
+  {
+    "id": "TSK-OHE-202",
+    "title": "Overhead Contact Wire Tensioning & Dropper Replacement",
+    "description": "Tension adjustment and dropper clip renewal along Section B-2 Freight Loop catenary system.",
+    "department": "Electrical / OHE",
+    "section": "Section B-2 (Freight Loop)",
+    "maintenance_type": "Overhead Wire Tensioning",
+    "planned_duration_hours": 3.5,
+    "priority": "Medium",
+    "status": "Pending",
+    "resources": {
+      "crew_type": "OHE Line Crew 1",
+      "crew_size": 4,
+      "equipment": [
+        "Tower Wagon TW-202",
+        "Catenary Tensioning Rig CR-11"
+      ],
+      "power_block_required": true,
+      "speed_restriction_kmh": null
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [],
+    "compatible_with_simultaneous_types": [],
+    "planned_start_offset_hours": 2.0
+  },
+  {
+    "id": "TSK-SNT-303",
+    "title": "Level Crossing Automatic Barrier & Flasher Servicing",
+    "description": "Routine quarterly electro-mechanical servicing of Gate 12 automatic booms and obstacle detection sensors.",
+    "department": "Signalling & Telecommunications (S&T)",
+    "section": "Section C-1 (Terminal Approaches)",
+    "maintenance_type": "Level Crossing S&T Servicing",
+    "planned_duration_hours": 2.0,
+    "priority": "Low",
+    "status": "Completed",
+    "actual_duration_hours": 2.1,
+    "resources": {
+      "crew_type": "S&T Telecom Squad",
+      "crew_size": 2,
+      "equipment": [
+        "Optical Fiber Splicer"
+      ],
+      "power_block_required": false,
+      "speed_restriction_kmh": null
+    },
+    "crew_availability_ratio": 1.0,
+    "equipment_available": true,
+    "dependencies": [],
+    "compatible_with_simultaneous_types": [],
+    "planned_start_offset_hours": 0.0
+  }
+]

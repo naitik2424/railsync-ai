@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database with Prisma
+  postgres:
+    image: postgres:16-alpine
+    container_name: railsync-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: railsync
+      POSTGRES_PASSWORD: railsync_pass
+      POSTGRES_DB: railsync_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U railsync -d railsync_ai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Python AI/ML & Google OR-Tools CP-SAT Microservice
+  python-ml-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: railsync-python-ml
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./backend/app/ml/artifacts:/app/backend/app/ml/artifacts
+
+  # 3. Express Main Application Backend (Node.js + TypeScript + Zod)
+  express-backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: railsync-express-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://railsync:railsync_pass@postgres:5432/railsync_ai?schema=public
+      - PYTHON_ML_SERVICE_URL=http://python-ml-service:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      python-ml-service:
+        condition: service_started
+
+  # 4. React + TypeScript + Vite Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: railsync-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000/api
+    depends_on:
+      - express-backend
+
+volumes:
+  postgres_data:
+    driver: local

@@ -6,7 +6,8 @@
     "department": "Track",
     "section": "Section A-1 (Mainline North)",
     "maintenance_type": "Rail Grinding & Ultrasonic Testing",
-    "planned_duration_hours": 3.0,
+    "planned_duration_hours": 3,
+    "actual_duration_hours": null,
     "priority": "High",
     "status": "Pending",
     "resources": {
@@ -18,14 +19,24 @@
       "power_block_required": false,
       "speed_restriction_kmh": 40
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [],
     "compatible_with_simultaneous_types": [
       "OHE Power Block Inspection",
       "Level Crossing S&T Servicing"
     ],
-    "planned_start_offset_hours": 0.0
+    "planned_start_offset_hours": 0,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.22,
+    "risk_level": "Low",
+    "delay_factors": [
+      "Standard operating parameters and adequate crew allocation."
+    ],
+    "created_at": "2026-10-26T18:49:13.386Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-OHE-201",
@@ -34,7 +45,8 @@
     "department": "Electrical / OHE",
     "section": "Section A-1 (Mainline North)",
     "maintenance_type": "OHE Power Block Inspection",
-    "planned_duration_hours": 3.0,
+    "planned_duration_hours": 3,
+    "actual_duration_hours": null,
     "priority": "Medium",
     "status": "Pending",
     "resources": {
@@ -47,14 +59,24 @@
       "power_block_required": true,
       "speed_restriction_kmh": null
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [],
     "compatible_with_simultaneous_types": [
       "Rail Grinding & Ultrasonic Testing",
       "Level Crossing S&T Servicing"
     ],
-    "planned_start_offset_hours": 0.0
+    "planned_start_offset_hours": 0,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.26,
+    "risk_level": "Low",
+    "delay_factors": [
+      "Standard operating parameters and adequate crew allocation."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-SNT-301",
@@ -64,6 +86,7 @@
     "section": "Section A-2 (Junction Yard)",
     "maintenance_type": "Point Machine Maintenance",
     "planned_duration_hours": 2.5,
+    "actual_duration_hours": null,
     "priority": "Critical",
     "status": "Pending",
     "resources": {
@@ -81,7 +104,17 @@
     "compatible_with_simultaneous_types": [
       "Traffic Block Coordination"
     ],
-    "planned_start_offset_hours": 1.0
+    "planned_start_offset_hours": 1,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.38,
+    "risk_level": "Medium",
+    "delay_factors": [
+      "Section historical delay rate is elevated (38%)."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-TRK-102",
@@ -90,7 +123,8 @@
     "department": "Track",
     "section": "Section A-2 (Junction Yard)",
     "maintenance_type": "Ballast Tamping",
-    "planned_duration_hours": 4.0,
+    "planned_duration_hours": 4,
+    "actual_duration_hours": null,
     "priority": "High",
     "status": "Pending",
     "resources": {
@@ -103,13 +137,23 @@
       "power_block_required": false,
       "speed_restriction_kmh": 30
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [
       "TSK-SNT-301"
     ],
     "compatible_with_simultaneous_types": [],
-    "planned_start_offset_hours": 3.5
+    "planned_start_offset_hours": 3.5,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.32,
+    "risk_level": "Low",
+    "delay_factors": [
+      "Standard operating parameters and adequate crew allocation."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-OPS-401",
@@ -118,7 +162,8 @@
     "department": "Railway Operations",
     "section": "Section B-1 (Suburban Corridor)",
     "maintenance_type": "Traffic Block Coordination",
-    "planned_duration_hours": 5.0,
+    "planned_duration_hours": 5,
+    "actual_duration_hours": null,
     "priority": "High",
     "status": "Pending",
     "resources": {
@@ -130,14 +175,24 @@
       "power_block_required": false,
       "speed_restriction_kmh": null
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [],
     "compatible_with_simultaneous_types": [
       "Track Relaying / Renewal",
       "Signal Interlocking Overhaul"
     ],
-    "planned_start_offset_hours": 0.0
+    "planned_start_offset_hours": 0,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.28,
+    "risk_level": "Low",
+    "delay_factors": [
+      "Standard operating parameters and adequate crew allocation."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-TRK-103",
@@ -147,6 +202,7 @@
     "section": "Section B-1 (Suburban Corridor)",
     "maintenance_type": "Track Relaying / Renewal",
     "planned_duration_hours": 5.5,
+    "actual_duration_hours": null,
     "priority": "Critical",
     "status": "Pending",
     "resources": {
@@ -167,7 +223,18 @@
     "compatible_with_simultaneous_types": [
       "Traffic Block Coordination"
     ],
-    "planned_start_offset_hours": 1.0
+    "planned_start_offset_hours": 1,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.68,
+    "risk_level": "High",
+    "delay_factors": [
+      "High task complexity score (5/5) on primary corridor.",
+      "Heavy freight traffic line."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-SNT-302",
@@ -176,7 +243,8 @@
     "department": "Signalling & Telecommunications (S&T)",
     "section": "Section B-1 (Suburban Corridor)",
     "maintenance_type": "Signal Interlocking Overhaul",
-    "planned_duration_hours": 3.0,
+    "planned_duration_hours": 3,
+    "actual_duration_hours": null,
     "priority": "High",
     "status": "Pending",
     "resources": {
@@ -188,13 +256,23 @@
       "power_block_required": false,
       "speed_restriction_kmh": null
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [
       "TSK-TRK-103"
     ],
     "compatible_with_simultaneous_types": [],
-    "planned_start_offset_hours": 6.5
+    "planned_start_offset_hours": 6.5,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.35,
+    "risk_level": "Medium",
+    "delay_factors": [
+      "Prerequisite task TSK-TRK-103 is high-risk."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-OHE-202",
@@ -204,6 +282,7 @@
     "section": "Section B-2 (Freight Loop)",
     "maintenance_type": "Overhead Wire Tensioning",
     "planned_duration_hours": 3.5,
+    "actual_duration_hours": null,
     "priority": "Medium",
     "status": "Pending",
     "resources": {
@@ -216,11 +295,21 @@
       "power_block_required": true,
       "speed_restriction_kmh": null
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [],
     "compatible_with_simultaneous_types": [],
-    "planned_start_offset_hours": 2.0
+    "planned_start_offset_hours": 2,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.25,
+    "risk_level": "Low",
+    "delay_factors": [
+      "Standard operating parameters and adequate crew allocation."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   },
   {
     "id": "TSK-SNT-303",
@@ -229,10 +318,10 @@
     "department": "Signalling & Telecommunications (S&T)",
     "section": "Section C-1 (Terminal Approaches)",
     "maintenance_type": "Level Crossing S&T Servicing",
-    "planned_duration_hours": 2.0,
+    "planned_duration_hours": 2,
+    "actual_duration_hours": 2.1,
     "priority": "Low",
     "status": "Completed",
-    "actual_duration_hours": 2.1,
     "resources": {
       "crew_type": "S&T Telecom Squad",
       "crew_size": 2,
@@ -242,10 +331,20 @@
       "power_block_required": false,
       "speed_restriction_kmh": null
     },
-    "crew_availability_ratio": 1.0,
+    "crew_availability_ratio": 1,
     "equipment_available": true,
     "dependencies": [],
     "compatible_with_simultaneous_types": [],
-    "planned_start_offset_hours": 0.0
+    "planned_start_offset_hours": 0,
+    "scheduled_start_hour": null,
+    "scheduled_end_hour": null,
+    "scheduled_window_id": null,
+    "predicted_delay_probability": 0.15,
+    "risk_level": "Low",
+    "delay_factors": [
+      "Completed nominally."
+    ],
+    "created_at": "2026-10-26T18:49:13.387Z",
+    "updated_at": "2026-10-26T18:49:13.387Z"
   }
 ]

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   AlertTriangle,
   BrainCircuit,
-  Plus,
-  Trash2,
-  CheckCircle2,
-  HelpCircle,
-  Clock,
   HardHat,
-  Cpu
+  Cpu,
+  Layers,
+  Calendar,
+  Sparkles,
+  Link2,
 } from 'lucide-react';
-import { MaintenanceTask, TaskCreateInput, Department, Priority, MaintenanceType } from '../types';
+import { MaintenanceTask, Department, Priority, MaintenanceType } from '../types';
 import { api } from '../services/api';
 import { RiskBadge } from './RiskBadge';
 
@@ -42,7 +41,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     existingTask?.maintenance_type || 'Ballast Tamping'
   );
   const [plannedDuration, setPlannedDuration] = useState(existingTask?.planned_duration_hours || 3.0);
-  const [actualDuration, setActualDuration] = useState<number | undefined>(existingTask?.actual_duration_hours ?? undefined);
+  const [actualDuration, setActualDuration] = useState<number | undefined>(
+    existingTask?.actual_duration_hours ?? undefined
+  );
   const [priority, setPriority] = useState<Priority>(existingTask?.priority || 'Medium');
   const [status, setStatus] = useState(existingTask?.status || 'Pending');
 
@@ -73,6 +74,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // AbortController reference to cancel stale in-flight prediction requests
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Maintenance types by department
   const maintenanceTypeMap: Record<Department, MaintenanceType[]> = {
@@ -112,29 +116,40 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     }
   };
 
-  // Re-estimate ML prediction whenever key parameters change
+  // 400ms Debounce with AbortController to eliminate redundant network traffic & stale responses
   useEffect(() => {
-    let active = true;
-    const fetchPrediction = async () => {
-      setLiveRisk((prev) => ({ ...prev, loading: true }));
-      try {
-        const res = await api.predictDelay({
-          department,
-          maintenance_type: maintenanceType,
-          section,
-          planned_duration_hours: Number(plannedDuration),
-          complexity_score: priority === 'Critical' ? 5 : priority === 'High' ? 4 : 3,
-          crew_experience_level: 2,
-          crew_size_allocated: Number(crewSize),
-          crew_shortage_ratio: Math.max(0, 1.0 - Number(crewAvailability)),
-          equipment_age_years: 5,
-          weather_condition: 'Clear',
-          is_night_shift: 0,
-          dependency_count: selectedDeps.length,
-          historical_section_delay_rate: 0.28,
-        });
+    // 1. Cancel previous in-flight request if user is still typing
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-        if (active) {
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setLiveRisk((prev) => ({ ...prev, loading: true }));
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.predictDelay(
+          {
+            department,
+            maintenance_type: maintenanceType,
+            section,
+            planned_duration_hours: Number(plannedDuration),
+            complexity_score: priority === 'Critical' ? 5 : priority === 'High' ? 4 : 3,
+            crew_experience_level: 2,
+            crew_size_allocated: Number(crewSize),
+            crew_shortage_ratio: Math.max(0, 1.0 - Number(crewAvailability)),
+            equipment_age_years: 5,
+            weather_condition: 'Clear',
+            is_night_shift: 0,
+            dependency_count: selectedDeps.length,
+            historical_section_delay_rate: 0.28,
+          },
+          controller.signal
+        );
+
+        if (!controller.signal.aborted) {
           setLiveRisk({
             prob: res.delay_probability,
             level: res.risk_level,
@@ -142,19 +157,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             loading: false,
           });
         }
-      } catch (e) {
-        if (active) {
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
           setLiveRisk((prev) => ({ ...prev, loading: false }));
         }
       }
-    };
+    }, 400); // Debounced by exactly 400ms
 
-    const timer = setTimeout(fetchPrediction, 300);
     return () => {
-      active = false;
       clearTimeout(timer);
+      controller.abort();
     };
-  }, [department, maintenanceType, section, plannedDuration, priority, crewSize, crewAvailability, selectedDeps]);
+  }, [
+    department,
+    maintenanceType,
+    section,
+    plannedDuration,
+    priority,
+    crewSize,
+    crewAvailability,
+    selectedDeps,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,14 +240,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     );
   };
 
-  // Filter possible dependencies (cannot depend on itself)
   const candidateDeps = allTasks.filter((t) => !existingTask || t.id !== existingTask.id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto animate-fade-in">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/40 shrink-0">
+        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
               <HardHat className="w-5 h-5" />
@@ -234,7 +256,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 {isEdit ? `Edit Task: ${existingTask.id}` : 'Create Maintenance Task'}
               </h2>
               <p className="text-xs text-slate-400 m-0">
-                Railway asset maintenance dispatch & resource scheduling
+                Configure engineering parameters, staffing, equipment constraints, and dependencies
               </p>
             </div>
           </div>
@@ -247,7 +269,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-1">
           {errorMsg && (
             <div className="p-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -255,30 +277,43 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           )}
 
-          {/* Live ML Prediction Preview Box */}
-          <div className="p-3.5 rounded-xl bg-slate-800/60 border border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
-                <BrainCircuit className={`w-4 h-4 ${liveRisk.loading ? 'animate-pulse' : ''}`} />
+          {/* Live ML Prediction Preview Card (Prominent & Debounced) */}
+          <div className="p-4 rounded-xl bg-slate-800/80 border border-purple-500/40 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
+                <BrainCircuit className={`w-5 h-5 ${liveRisk.loading ? 'animate-spin' : ''}`} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-purple-300">Live ML Delay Assessment</span>
-                  <span className="text-[10px] text-slate-400 font-mono">(Random Forest Inference)</span>
+                  <span className="text-xs font-bold text-purple-200">
+                    Live Random Forest Delay Assessment
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-900/50 text-purple-300 font-mono">
+                    Debounced (400ms)
+                  </span>
                 </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  {liveRisk.factors[0] || 'Nominal execution parameters'}
+                <div className="text-[11px] text-slate-300 mt-0.5">
+                  {liveRisk.loading ? (
+                    <span className="text-slate-400 animate-pulse">Evaluating task parameters...</span>
+                  ) : (
+                    liveRisk.factors[0] || 'Nominal operational parameters'
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-              <RiskBadge level={liveRisk.level} probability={liveRisk.prob} size="sm" />
+              <RiskBadge level={liveRisk.level} probability={liveRisk.prob} size="md" />
             </div>
           </div>
 
-          {/* Title & Description */}
+          {/* Group 1: Core Scope */}
           <div className="space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-blue-400" />
+              <span>1. Task Scope & Definition</span>
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Task Title <span className="text-red-400">*</span>
@@ -288,7 +323,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Mainline Rail Ultrasonic Testing & Joint Tightening"
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 required
               />
             </div>
@@ -299,127 +334,141 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                placeholder="Detailed scope of work, safety protocol, or specific track km milestones..."
+                placeholder="Scope of work, physical track block limits, or safety protocol..."
                 className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
-          {/* Department, Type & Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Department</label>
-              <select
-                value={department}
-                onChange={(e) => handleDepartmentChange(e.target.value as Department)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
-              >
-                <option value="Track">Track</option>
-                <option value="Electrical / OHE">Electrical / OHE</option>
-                <option value="Signalling & Telecommunications (S&T)">S&T Signals</option>
-                <option value="Railway Operations">Railway Operations</option>
-              </select>
+          {/* Group 2: Department, Type & Section */}
+          <div className="space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-blue-400" />
+              <span>2. Operational Location & Department</span>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Maintenance Type</label>
-              <select
-                value={maintenanceType}
-                onChange={(e) => setMaintenanceType(e.target.value as MaintenanceType)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
-              >
-                {maintenanceTypeMap[department]?.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Department</label>
+                <select
+                  value={department}
+                  onChange={(e) => handleDepartmentChange(e.target.value as Department)}
+                  className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                >
+                  <option value="Track">Track Engineering</option>
+                  <option value="Electrical / OHE">Electrical / OHE</option>
+                  <option value="Signalling & Telecommunications (S&T)">S&T Signals</option>
+                  <option value="Railway Operations">Railway Operations</option>
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Railway Section</label>
-              <select
-                value={section}
-                onChange={(e) => setSection(e.target.value)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
-              >
-                {sectionsList.map((sec) => (
-                  <option key={sec} value={sec}>
-                    {sec}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Maintenance Type</label>
+                <select
+                  value={maintenanceType}
+                  onChange={(e) => setMaintenanceType(e.target.value as MaintenanceType)}
+                  className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                >
+                  {maintenanceTypeMap[department]?.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Railway Section</label>
+                <select
+                  value={section}
+                  onChange={(e) => setSection(e.target.value)}
+                  className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                >
+                  {sectionsList.map((sec) => (
+                    <option key={sec} value={sec}>
+                      {sec}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Duration & Priority & Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Planned Duration (Hours) <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                min="0.5"
-                max="24"
-                value={plannedDuration}
-                onChange={(e) => setPlannedDuration(parseFloat(e.target.value) || 1)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-              />
+          {/* Group 3: Duration & Staffing */}
+          <div className="space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <span>3. Timing, Priority & Crew Availability</span>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as Priority)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Critical">Critical</option>
-              </select>
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Planned Duration (Hours) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
+                  max="24"
+                  value={plannedDuration}
+                  onChange={(e) => setPlannedDuration(parseFloat(e.target.value) || 1)}
+                  className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                />
+              </div>
 
-            {isEdit ? (
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Status</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Priority Level</label>
                 <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as Priority)}
                   className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                 >
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Blocked">Blocked</option>
-                  <option value="Cancelled">Cancelled</option>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
                 </select>
               </div>
-            ) : (
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Crew Availability</label>
-                <select
-                  value={crewAvailability}
-                  onChange={(e) => setCrewAvailability(parseFloat(e.target.value))}
-                  className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
-                >
-                  <option value="1.0">100% (Full Crew)</option>
-                  <option value="0.85">85% (Minor Shortage)</option>
-                  <option value="0.70">70% (Moderate Shortage)</option>
-                  <option value="0.50">50% (Severe Shortage)</option>
-                </select>
-              </div>
-            )}
+
+              {isEdit ? (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Status</label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as any)}
+                    className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Blocked">Blocked</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Crew Availability</label>
+                  <select
+                    value={crewAvailability}
+                    onChange={(e) => setCrewAvailability(parseFloat(e.target.value))}
+                    className="w-full bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="1.0">100% (Full Crew Present)</option>
+                    <option value="0.85">85% (Minor Crew Deficit)</option>
+                    <option value="0.70">70% (Moderate Crew Deficit)</option>
+                    <option value="0.50">50% (Severe Shortage - Delay Risk)</option>
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Resources & Equipment */}
+          {/* Group 4: Scarce Resources & Equipment Constraints */}
           <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
-            <div className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
               <Cpu className="w-3.5 h-3.5 text-blue-400" />
-              <span>Crew & Specialized Equipment Allocation</span>
+              <span>4. Scarce Equipment & Power Block Requirements</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -435,7 +484,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Crew Size</label>
+                <label className="block text-[11px] font-medium text-slate-400 mb-1">Staffing Headcount</label>
                 <input
                   type="number"
                   min="1"
@@ -449,7 +498,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
             <div>
               <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                Specialized Equipment (Comma-separated)
+                Scarce Equipment Names (Comma-separated)
               </label>
               <input
                 type="text"
@@ -459,30 +508,29 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white"
               />
               <p className="text-[10px] text-slate-400 mt-1">
-                Scarce equipment enforces OR-Tools mutual exclusion (NoOverlap constraint).
+                Shared machines cannot be double-booked across tasks (Google OR-Tools NoOverlap constraint).
               </p>
             </div>
 
-            <div className="flex items-center gap-3 pt-1">
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={powerBlock}
-                  onChange={(e) => setPowerBlock(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
-                />
-                <span>Requires 25kV OHE Power Block (Overhead de-energization)</span>
-              </label>
-            </div>
+            <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={powerBlock}
+                onChange={(e) => setPowerBlock(e.target.checked)}
+                className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
+              />
+              <span>Requires 25kV OHE Power Block (Catenary traction de-energization)</span>
+            </label>
           </div>
 
-          {/* Dependencies Selector */}
+          {/* Group 5: Precedence & Upstream Dependencies */}
           <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                Upstream Dependencies ({selectedDeps.length} selected)
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <Link2 className="w-3.5 h-3.5 text-blue-400" />
+                <span>5. Upstream Prerequisites ({selectedDeps.length} selected)</span>
               </span>
-              <span className="text-[10px] text-slate-400">Prerequisite tasks that must complete first</span>
+              <span className="text-[10px] text-slate-400">Must finish before this task can start</span>
             </div>
 
             {candidateDeps.length === 0 ? (
@@ -520,7 +568,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         </form>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 border-t border-slate-800 flex items-center justify-between bg-slate-800/40 shrink-0">
+        <div className="px-6 py-3.5 border-t border-slate-800 flex items-center justify-between bg-slate-800/50 shrink-0">
           <button
             type="button"
             onClick={onClose}

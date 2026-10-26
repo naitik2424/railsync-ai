@@ -10,10 +10,11 @@ import {
   WhatIfScenario,
   WhatIfRequest,
   WhatIfResponse,
-  DashboardSummary
+  DashboardSummary,
 } from '../types';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+// Default to Express backend port 5000, fallback to import.meta.env if provided
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000/api';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -78,12 +79,16 @@ export const api = {
     return handleResponse<MaintenanceTask[]>(res);
   },
 
-  // Predictions
-  async predictDelay(req: DelayPredictionRequest): Promise<DelayPredictionResponse> {
+  // Predictions with AbortSignal support to cancel stale in-flight requests
+  async predictDelay(
+    req: DelayPredictionRequest,
+    signal?: AbortSignal
+  ): Promise<DelayPredictionResponse> {
     const res = await fetch(`${API_BASE}/predictions/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
+      signal,
     });
     return handleResponse<DelayPredictionResponse>(res);
   },

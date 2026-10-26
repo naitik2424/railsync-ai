@@ -7,7 +7,7 @@
   "baseline_accuracy": 0.5844,
   "training_samples": 1280,
   "test_samples": 320,
-  "trained_at": "2026-10-25T10:03:19.929482+00:00",
+  "trained_at": "2026-10-26T18:48:05.083591+00:00",
   "model_type": "RandomForestClassifier(Pipeline)",
   "feature_importances": {
     "planned_duration_hours": 0.1306,
